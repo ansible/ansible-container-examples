@@ -89,6 +89,7 @@ ENV/
 .ropeproject
 
 # shipit output and testing
+roles/
 ansible/roles/
 shipit_*/
 shipit*.yml
