@@ -1,0 +1,136 @@
+
+- kube_service:
+    service_name: static
+    ports:
+    - name: port-80
+      port: 80
+      targetPort: 8080
+    selector:
+      app: example
+      service: static
+    type: LoadBalancer
+  register: output
+
+- debug: var=output
+  when: playbook_debug
+
+- kube_service:
+    service_name: postgresql
+    ports:
+    - name: port-5432
+      port: 5432
+      targetPort: 5432
+    selector:
+      app: example
+      service: postgresql
+  register: output
+
+- debug: var=output
+  when: playbook_debug
+
+- kube_service:
+    service_name: django
+    ports:
+    - name: port-8080
+      port: 8080
+      targetPort: 8080
+    selector:
+      app: example
+      service: django
+  register: output
+
+- debug: var=output
+  when: playbook_debug
+
+- kube_deployment:
+    labels:
+      app: example
+      service: gulp
+    deployment_name: gulp
+    containers:
+    - securityContext: {}
+      name: gulp
+      args:
+      - /bin/false
+      image: google/example-gulp:20160624200715
+    replace: true
+    state: absent
+  register: output
+
+- debug: var=output
+  when: playbook_debug
+
+- kube_deployment:
+    labels:
+      app: example
+      service: static
+    deployment_name: static
+    containers:
+    - securityContext:
+        runAsUser: 997
+      name: static
+      ports:
+      - 8080
+      args:
+      - /usr/bin/dumb-init
+      - nginx
+      - -c
+      - /etc/nginx/nginx.conf
+      image: google/example-static:20160624200715
+    replace: true
+  register: output
+
+- debug: var=output
+  when: playbook_debug
+
+- kube_deployment:
+    labels:
+      app: example
+      service: postgresql
+    deployment_name: postgresql
+    containers:
+    - securityContext: {}
+      name: postgresql
+      env:
+        POSTGRES_DB: example
+        POSTGRES_PASSWORD: sesame
+        POSTGRES_USER: example
+      image: postgres:9.4
+      volumeMounts:
+      - mountPath: /var/lib/postgresql/data
+        name: var-lib-postgresql-data
+        readOnly: false
+    replace: true
+    volumes:
+    - emptyDir:
+        medium: ''
+      name: var-lib-postgresql-data
+  register: output
+
+- debug: var=output
+  when: playbook_debug
+
+- kube_deployment:
+    labels:
+      app: example
+      service: django
+    deployment_name: django
+    containers:
+    - securityContext:
+        runAsUser: 1000
+      name: django
+      image: google/example-django:20160624200715
+      workingDir: /django
+      args:
+      - /usr/bin/dumb-init
+      - /venv/bin/gunicorn
+      - -w
+      - '2'
+      - -b
+      - 0.0.0.0:8080
+      - example.wsgi:application
+    replace: true
+  register: output
+
+- debug: var=output
+  when: playbook_debug
