@@ -29,7 +29,7 @@
       register: django_assets
     - name: Fetch Django static assets
       fetch: src="{{ item.path }}" dest=/tmp
-      with_items: django_assets.files
+      with_items: "{{ django_assets.files }}"
     - name: Wait for the database to come up...
       wait_for: host=postgresql port=5432 delay=10
     - name: Apply database migrations
@@ -65,7 +65,7 @@
       register: gulp_assets
     - name: Fetch built assets
       fetch: src="{{ item.path }}" dest=/tmp
-      with_items: gulp_assets.files
+      with_items: "{{ gulp_assets.files }}"
 - hosts: static
   tasks:
     - name: Install EPEL

@@ -1,0 +1,22 @@
+# Bare minimum
+django-cms>=3.0
+
+# These dependencies are brought in by django CMS, but if you want to
+# lock-in their version, specify them
+Django>=1.8
+
+django-treebeard==3.0
+django-sekizai==0.8.2
+django-classy-tags==0.6.2
+djangocms-admin-style==0.2.2
+html5lib==0.999
+six==1.3.0
+
+# Optional, recommended packages
+Pillow>=2
+django-filer==0.9.9
+cmsplugin-filer==0.10.1
+django-reversion==1.8.5
+
+# db
+psycopg2
