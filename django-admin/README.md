@@ -6,7 +6,7 @@ Instead of using the [Postgresql](https://hub.docker.com/_/postgres/) image from
 ## Why?
 
 The standard Postgresql image found on Docker Hub does not comply with the [OpenShift-Specific Guidelines]
-(https://docs.openshift.com/online/creating_images/guidelines.html) for creating images. In particular OpenShift v3 requires that an images run as an arbitrary User ID and 
+(https://docs.openshift.com/online/creating_images/guidelines.html) for creating images. In particular OpenShift v3 requires that an image run as an arbitrary User ID and 
 not as a privileged user. The standard Postgresql image expects to run as a privileged user so that it can `chown` and `chmod` mount points, making them owned by and 
 accessible to the postgresql user.
 
@@ -36,10 +36,11 @@ $ cd ansible-container-examples/django-admin
 $ ansible-container build
 ```
 
-The build command creates the images for the sample application. There are 4 services defined in the ansible/container.yml file. A container is created for each, along
-with a build container for running Ansible. The ansible/main.yml playbook is executed on the build container. Each of the 4 containers are nodes in the build 
-container's inventory. The playbook is executed against the inventory of 4 containers. Once playbook execution completes, the containers are stopped and a 
-snapshot is taken of each container. The snapshot is the image. So once the process completes, we will see 4 new images available in the local image cache.
+The build command creates the images for the sample application. There are 4 services defined in the [ansible/container.yml](https://github.com/ansible/ansible-container-examples/blob/master/django-admin/ansible/container.yml) 
+file. A container is created for each, along with a build container for running Ansible. The [ansible/main.yml playbook](https://github.com/ansible/ansible-container-examples/blob/master/django-admin/ansible/main.yml) 
+is executed on the build container.  Each of the 4 containers are nodes in the build container's inventory. The playbook is executed against the inventory of 4 
+containers. Once playbook execution completes, the containers are stopped and a snapshot is taken of each container. The snapshot is the image. So once the process 
+completes, we will see 4 new images available in the local image cache.
 
 Running the build command produces the following output:
 
@@ -74,7 +75,7 @@ Cleaning up django build container...
 Cleaning up Ansible Container builder...
 ```
 
-Once the build completes check the local image cache. You should images for each of the django-admin services:
+Once the build completes, check the local image cache. You will see images for each of the django-admin services:
 
 ```
 $ docker images
@@ -96,20 +97,16 @@ an attached state, allowing the stdout of each container to dispaly on your term
 killed or you press *Ctrl-C* on your keyboard.
 
 With the containers running, you should be able to open a browser window and access the application on port 8100 of the Docker daemon host. The root of the application 
-is */admin*. So to get to the application in your browser, you'll enter: http://<Docker host IP>:8100/admin
+is */admin*. So to get to the application in your browser, you'll enter: `http://<Docker host IP>:8100/admin`
 
 If you're running Docker Machine, the Docker daemon host is the IP of the Vagrant box. You can get the IP with the command `docker-machine ip <host name>`, where 
 host name is the actual name of the host registered with VirtualBox Manager.
 
 When everything is working, you will see th following in your browser:
 
-## ShipIt
-
-
-
-
-
-
+<< image here >>
 
 ## ShipIt
+
+Describe the shipit experience here...
 
