@@ -1,5 +1,4 @@
-const main = () => {
-
-}
+"use strict";
+const main = (function() { });
 
 document.addEventListener('DOMContentLoaded', main)

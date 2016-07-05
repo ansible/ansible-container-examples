@@ -97,3 +97,8 @@ tmp.yml
 *.log
 *.retry
 *.out
+
+.ansible/
+.bash_history
+.v8flags.4.6.85.31.undefined.json
+
