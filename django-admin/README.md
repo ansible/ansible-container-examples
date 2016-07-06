@@ -104,7 +104,7 @@ host name is the actual name of the host registered with VirtualBox Manager.
 
 When everything is working, you will see th following in your browser:
 
-<< image here >>
+![django-admin-img](https://raw.githubusercontent.com/chouseknecht/misc/master/django-admin.png)
 
 ## ShipIt
 
