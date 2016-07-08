@@ -7,16 +7,18 @@
     - name: Install python deps
       yum: name=postgresql-devel,python-devel,gcc,python-virtualenv state=latest update_cache=yes
     - name: Make Django user
-      user: name=django state=present createhome=yes home=/django
+      user: name=django state=present createhome=yes home=/django group=root
+    - name: Create /django with correct permissions
+      file: name=/django state=directory owner=django group=root mode=0777
     - name: Make virtualenv dir
-      file: name=/venv state=directory owner=django
+      file: name=/venv state=directory owner=django group=root mode=g+rw
     - name: Make staticfiles dir
-      file: name=/static state=directory owner=django
+      file: name=/static state=directory owner=django group=root mode=g+rw 
     - name: Setup virtualenv
       command: virtualenv . chdir=/venv creates=/venv/bin/python
       remote_user: django
     - name: Copy source
-      copy: src="{{ lookup('pipe','dirname `pwd`') }}/" dest=/django owner=django
+      copy: src="{{ lookup('pipe','dirname `pwd`') }}/" dest=/django
       remote_user: django
     - name: Install requirements
       pip: executable=/venv/bin/pip requirements=/django/requirements.txt
@@ -37,8 +39,6 @@
       remote_user: django
 - hosts: gulp
   tasks:
-    #- name: Install EPEL
-    #  yum: name=epel-release state=latest update_cache=yes
     - name: Make node user
       user: name=node state=present createhome=yes home=/node
     - name: Make sure node owns its working dir
@@ -70,15 +70,28 @@
   tasks:
     - name: Install EPEL
       yum: name=epel-release state=latest update_cache=yes
+
     - name: Install nginx
       yum: name=nginx state=latest
+
     - name: Put nginx config
       copy: src=nginx.conf dest=/etc/nginx/nginx.conf
+
     - name: Make static dir
-      file: name=/static state=directory owner=nginx
-    - name: Make pidfile dir writeable
-      file: name=/run state=directory owner=nginx
+      file: name=/static state=directory owner=nginx group=root mode=g+rw
     - name: Put Django assets
       copy: src=/tmp/django/static/ dest=/static/ owner=nginx
     - name: Put built assets
       copy: src=/tmp/gulp/node/dist dest=/static/ owner=nginx
+
+    - name: Make pidfile dir accessible 
+      file: name=/run state=directory owner=nginx group=root mode=g+rw recurse=yes
+
+    - name: Set permission on /var/lib/nginx 
+      file: name=/var/lib/nginx owner=nginx group=root mode=g+rw recurse=yes
+    - name: Allow root group x on /var/lib/nginx subdirs
+      command: find /var/lib/nginx -type d -exec chmod g+x {} +
+
+    - name: Set permissions on /var/log/nginx
+      file: name=/var/log/nginx state=directory owner=nginx group=root mode=g+rwx
+

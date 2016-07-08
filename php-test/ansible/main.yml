@@ -1,0 +1,3 @@
+- hosts: php
+  tasks:
+    - debug: msg="here!"

@@ -16,8 +16,6 @@ services:
     options:
       kube:
         runAsUser: 1000
-      openshift:
-        runAsUser: 1000
   static:
     image: centos:7
     ports:
@@ -28,11 +26,9 @@ services:
     command: ['/usr/bin/dumb-init', 'nginx', '-c', '/etc/nginx/nginx.conf']
     dev_overrides:
       ports: []
-      command: 'bin/false'
+      # command: /bin/false
     options:
       kube:
-        runAsUser: 997
-      openshift:
         runAsUser: 997
   postgresql:
     image: openshift/postgresql-92-centos7
