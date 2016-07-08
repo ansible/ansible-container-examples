@@ -119,9 +119,9 @@ host name is the actual name of the host registered with VirtualBox Manager.
 
 When everything is working, you will see th following in your browser:
 
-![django-admin-img](https://raw.githubusercontent.com/chouseknecht/misc/master/django-admin.png)
+![django-admin-img](https://github.com/ansible/ansible-container-examples/blob/master/images/django-admin.png)
 
-## Push
+## Login 
 
 If you have not already done so, log into your OpenShift web console and create a project called *django-admin*. The application will be deployed into this project. 
 
@@ -138,6 +138,8 @@ $ oc project django-admin
 Now using project "django-admin" on server "https://api.dev-preview-stg.openshift.com:443"
 ```
 
+## Push
+
 Before the application can be deployed, the OpenShift cluster needs access to the image files. The easiest way to make the images accessible is to push them to the 
 internal OpenShift registry, which you can do using Ansible Container. Note in the example below, we pass a --push-to value equal to the OpenShift registry followed 
 by '/' and the name of the project: 
@@ -146,11 +148,97 @@ by '/' and the name of the project:
 $ ansible-container push --push-to https://registry.dev-preview-stg.openshift.com/django-admin --username <username> --password <access token>
 ```
 
-After successfully pushing the images, you will see the following on Openshift
+After successfully pushing the images, take a look at the images on OpenShift. Images on Openshift are ferred to as *image streams*. Go to *Browse -> Image Streams* in 
+your OpenShift web console. You will something like the following:
+
+![image streams](https://github.com/ansible/ansible-container-examples/blob/master/images/image_streams.png) 
 
 ## ShipIt
 
-Next, runt *shipit* to generate a deployment playbook and role. Run using the *openshift* engine and specify 
+Next, run *shipit* to generate a deployment playbook and role. Specifiy the *openshift* engine, and use the --push-to option to specify the URL the cluster will use to locate 
+and pull the images.
+
+**NOTE** the URL for the *--pull-to* option is not the same URL used to push the images. The --pull-to URL will point to the internal registry using an IP address. 
+View the *Browse -> Image Streams* page in your OpenShift web console. to get the correct IP address.
+
+Follow the IP address with '/' + the name of the project. The *shipit* command will look similar to the following:
 
 ```
-ansible-container shipit openshift --pull-from registry.dev-preview-stg.openshift.com/django-admin 
+$ ansible-container shipit openshift --pull-from 172.30.46.234:5000/django-admin
+
+Images will be pulled from 172.30.46.234:5000/django-admin
+Attaching to ansible_ansible-container_1
+Cleaning up Ansible Container builder...
+Role django-admin created.
+```
+
+Running *shipit* results in a playbook and a role being created in the *ansible* directory. You will see a *roles* directory and shipit-openshift.yml playbook:
+
+```
+$ ls -l ansible
+
+total 88
+-rw-r--r--  1 chouseknecht  staff  14760 Jul  8 12:25 ansible-container.log
+-rw-r--r--  1 chouseknecht  staff   1403 Jul  8 12:17 container.yml
+drwxr-xr-x  3 chouseknecht  staff    102 Jul  7 18:21 files
+-rw-r--r--  1 chouseknecht  staff     10 Jun 26 13:14 inventory
+-rw-r--r--  1 chouseknecht  staff      7 Jul  8 11:54 main.retry
+-rw-r--r--  1 chouseknecht  staff   4005 Jul  8 11:57 main.yml
+-rw-r--r--  1 chouseknecht  staff    148 Jun 26 13:14 requirements.txt
+drwxr-xr-x  3 chouseknecht  staff    102 Jul  6 02:09 roles
+-rw-r--r--  1 chouseknecht  staff    179 Jul  6 02:09 shipit-openshift.yml
+```
+
+## Deploy
+
+Running the playbook will deploy the app. Run from within the *ansible* directory:
+
+```
+$ cd ansible
+$ ansible-playbook shipit-openshift.yml
+```
+
+After the playbook completes, take a look at the services, pods and routes created by the role:
+
+```
+$ oc get service
+
+NAME         CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+django       172.30.9.83     <none>        8080/TCP   2d
+postgresql   172.30.53.172   <none>        5432/TCP   2d
+static       172.30.6.139    <none>        80/TCP     2d
+
+```
+
+$ oc get pod
+
+NAME                 READY     STATUS    RESTARTS   AGE
+django-1-aw6s3       1/1       Running   0          2h
+postgresql-1-19z6q   1/1       Running   0          2h
+static-1-rwn1d       1/1       Running   0          2h
+
+$ oc get route
+
+NAME        HOST/PORT                                                       PATH      SERVICE          TERMINATION   LABELS
+static-80   static-80-django-admin.b795.dev-preview-stg.openshiftapps.com             static:port-80                 app=django-admin,service=static
+
+```
+
+The pods are created using deployments:
+
+```
+$ oc get dc
+
+NAME         REVISION   REPLICAS   TRIGGERED BY
+django       1          1          config
+postgresql   1          1          config
+static       1          1          config
+
+```
+
+The route contains the URL for accessing the application via web browser. It's the full *openshfitapps.com* domain listed under *HOST/PORT*. Add '/admin' to view the 
+same log-in page viewed while the app ran locally. Using the above output from the `oc get route` command as an example, we can access the app with the following: 
+
+```
+http://static-80-django-admin.b795.dev-preview-stg.openshiftapps.com/admin
+```
