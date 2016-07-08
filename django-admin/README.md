@@ -209,7 +209,6 @@ django       172.30.9.83     <none>        8080/TCP   2d
 postgresql   172.30.53.172   <none>        5432/TCP   2d
 static       172.30.6.139    <none>        80/TCP     2d
 
-```
 
 $ oc get pod
 
