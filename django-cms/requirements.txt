@@ -18,5 +18,5 @@ django-filer==0.9.9
 cmsplugin-filer==0.10.1
 django-reversion==1.8.5
 
-# db
+# db driver
 psycopg2

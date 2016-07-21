@@ -19,14 +19,3 @@
 #       apt: deb=https://github.com/Yelp/dumb-init/releases/download/v1.0.2/dumb-init_1.0.2_amd64.deb
 #     - name: Install Apache
 #       apt: name=apache2 state=latest
-
-- hosts: django 
-  gather_facts: no
-  tasks:
-    - apt: name="{{ item }}"
-      with_items:
-        - libpq-dev
-        - postgresql-client-9.3
-        - python-dev  
-
-    - pip: requirements=requirements.txt

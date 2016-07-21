@@ -1,9 +1,0 @@
-version: "1"
-services:
-  php:
-    image: "ubuntu:14.04"
-    command: ["/usr/bin/sleep", "600"]
-    expose:
-      - "9000"
-
-registries: {}
