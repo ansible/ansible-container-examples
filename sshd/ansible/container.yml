@@ -1,0 +1,11 @@
+version: "1"
+services:
+  ssh:
+    image: ubuntu:14.04
+    ports:
+      - 22
+    environment:
+      - NOTVISIBLE="in users profile"
+    command: ["/usr/sbin/sshd", "-D"]
+     
+registries: {}

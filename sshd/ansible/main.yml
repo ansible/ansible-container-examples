@@ -1,0 +1,24 @@
+- hosts: ssh
+  gather_facts: no
+  vars:
+    mypassword: password 
+  tasks:
+    - name: Update all packages 
+      raw: apt-get update
+    - name: Install python 
+      raw: apt-get install -y python python-apt
+    - name: Install openssh-server
+      apt: name=openssh-server state=present
+    - name: Create /var/run/sshd
+      file: path=/var/run/sshd state=directory owner=root group=root mode=0755
+    - name: Update sshd_config
+      replace: dest=/etc/ssh/sshd_config regexp='^PermitRootLogin without-password' replace='PermitRootLogin yes'
+    - name: Update pam settings
+      replace: dest=/etc/pam.d/sshd regexp='session\s*required\s*pam_loginuid.so' replace='session optional pam_loginuid.so'
+    - name: Update /etc/profile
+      lineinfile: dest=/etc/profile line='VISIBLE=now'
+    - name: Get encrypted password
+      shell: python -c 'import crypt; print crypt.crypt("{{ mypassword }}", "$1$SomeSalt$")'
+      register: output
+    - name: Set root password
+      user: name=root password="{{ output.stdout }}" update_password=always 

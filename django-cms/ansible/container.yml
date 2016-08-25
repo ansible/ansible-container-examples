@@ -12,8 +12,5 @@ services:
       POSTGRESQL_USER: 'example'
       POSTGRESQL_PASSWORD: 'sesame'
       POSTGRESQL_DATABASE: 'example'    
+
 registries: {}
-  # Add optional registries used for deployment. For example:
-  #  google:
-  #    url: https://gcr.io
-  #    namespace: my-cool-project-xxxxxx   
