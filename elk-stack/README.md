@@ -90,7 +90,7 @@ $ ansible-container --var-file devel.yml run
 ```
 
 Using Jinja templating in *container.yml* provides some nice flexibility by allowing us to separate the configuration directives from the data. This makes it possible to substitute different configuration data
-depending on the environment, and incorporating templating also gives us access to control structures like the *{% if %}* and *{% for %}* expressions, as demonstrated above. And, it's even possible
+depending on the environment. It also gives us access to control structures like the *{% if %}* and *{% for %}* expressions, as demonstrated above, and it even makes it possible
 to share variable definitions with Ansible Plabyoook during the *build* process. For example, we could pass the variable file into the playbook run by doing the following:
 
 ```
