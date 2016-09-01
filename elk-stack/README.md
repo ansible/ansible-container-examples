@@ -58,7 +58,7 @@ Notice in each of the defined port mappings the host portion is replaced with a 
 is defined as 3000, then 3000 will be substituted for `{{ kibana_access_port }}` during template rendering.
 
 Also, notice the *volumes* directive for the *elk* service. It's wrapped in a Jinja `{% if %} ... {% endif %}` control block. As you might guess just from reading it, if the 
-*logstash_data* variable is defined, then a volume gets defined, and it binds the value of *logstash_data* to */var/lib/elasticsearch. Conversly, if *logstash_data* is not defined, the volume 
+*logstash_data* variable is defined, then a volume gets defined, and it binds the value of *logstash_data* to */var/lib/elasticsearch*. Conversly, if *logstash_data* is not defined, the volume 
 directive is excluded altogether form the final *container.yml*.  
 
 The same thing has been done in the *nginx* service where variable substitution is used in the port mapping, and there is a conditionally defined volume for */var/log/nginx*. 
