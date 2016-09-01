@@ -1,9 +1,10 @@
 # elk-stack
 
-This is example was taken from the [Elasticsearch, Logstash, Kibana (ELK) Docker image documentation](https://elk-docker.readthedocs.io/).
+This example was taken from the [Elasticsearch, Logstash, Kibana (ELK) Docker image documentation](https://elk-docker.readthedocs.io/).
 
-The intention of this example is to present a how-to for using [Jinja](http://jinja.pocoo.org) templating within *container.yml*. Take a look at 
-[Quck Tour](http://docs.ansible.com/ansible-container/tour.html), if you're unfamiliar with *contianer.yml* and its role in an Ansible Container project.
+The intention is to present a how-to for using [Jinja](http://jinja.pocoo.org) templating within *container.yml*. Take a look at the 
+[Quck Tour](http://docs.ansible.com/ansible-container/tour.html), if you're unfamiliar with *contianer.yml* and its role in an 
+Ansible Container project.
 
 Here is the *container.yml* included in this project:
 
