@@ -43,27 +43,28 @@ services:
 registries: {}
 ```
 
-When Ansible Container reads this *container.yml* it will pass it through Jinja template rendering and use the result. For template rendering to work Jinja needs to know the values of the variables 
-referenced in each expression. If you are unfamiliar with Jinja and template expressions, please review [the Jinja docs](http://jinja.pocoo.org/docs/dev/). Variable definitions can be passed to 
-Ansible Container using the following methods:
+When Ansible Container reads *container.yml* it passes it through Jinja template rendering, and then uses the result. For template rendering to work Jinja needs to know the values of the variables 
+referenced in each expression. If you are unfamiliar with Jinja and template expressions, please review [the Jinja docs](http://jinja.pocoo.org/docs/dev/).
 
-- Use the *--var-file* option, pass the path of a YAML or JSON file containing definitions
+Variable definitions can be passed to Ansible Container using the following methods:
+
+- Use the *--var-file* option, passing the path of a YAML or JSON file 
 - Provide a *defaults* top-level section in the *container.yml* file
 - Define  *AC_* environment variables that correspond to the Jinja variables  
 
-Let's take a look at the *container.yml* starting with the *elk* services. It uses an ELK stack image, *sebp/elk*, pulled from Docker Hub as its base iamge, and it exposes the standard ELK ports. 
-Notice In the host portion of each of the defined port mappings the host portion is replaced with a Jinja expression, giving us the following expressions: `{{ kibana_access_port }}`, 
-`{{ beats_access_port }}`, `{{ logstash_access_port }}`, and `{{ forwarder_access_port }}`. These expressions represent variable substitution in Jinja. If *kibana_access_port*, for example, 
+Let's take a look at the *container.yml* starting with the *elk* services. It uses an ELK stack image, *sebp/elk*, pulled from Docker Hub as its base image, and it exposes the standard ELK ports. 
+Notice in each of the defined port mappings the host portion is replaced with a Jinja expression, giving us the following expressions: `{{ kibana_access_port }}`, 
+`{{ beats_access_port }}`, `{{ logstash_access_port }}`, and `{{ forwarder_access_port }}`. These expressions represent variable substitutions in Jinja. For example, if *kibana_access_port*  
 is defined as 3000, then 3000 will be substituted for `{{ kibana_access_port }}` during template rendering.
 
-Also, notice the *volumes* directive for the *elk* service. It's wrapped in a Jinja `{% if %} ... {% endif %}` expression. As you might guess just from reading it, if the 
+Also, notice the *volumes* directive for the *elk* service. It's wrapped in a Jinja `{% if %} ... {% endif %}` control block. As you might guess just from reading it, if the 
 *logstash_data* variable is defined, then a volume gets defined, and it binds the value of *logstash_data* to */var/lib/elasticsearch. Conversly, if *logstash_data* is not defined, the volume 
 directive is excluded altogether form the final *container.yml*.  
 
 The same thing has been done in the *nginx* service where variable substitution is used in the port mapping, and there is a conditionally defined volume for */var/log/nginx*. 
 
-Notice toward the top of the file there is a *defaults* section. It provides default vaules for all of the variables used in the port definition. This insures that the port mappings will always work.
-If no other definitions are provided using either *AC_* environment variables a variable file passed in using the *--var-file* option, then the default variables will be used. 
+Notice toward the top of the file there is a *defaults* section. It provides default vaules for all of the variables used in the port definitions. This insures the port mappings will always work.
+If no other definitions are provided using either *AC_* environment variables or a variable file passed in using the *--var-file* option, then the *default* values will be used. 
 
 Variable precedence is given in the following order:
 
@@ -71,26 +72,26 @@ Variable precedence is given in the following order:
 - variable file
 - environment variables
 
-The default definition gets the lowest precedence, and environment variables receive the highest. This means that if we define a default value for *nginx_access_port* of *8080*, as in the above 
-example, and we also define *AC_NGINX_ACCESS_PORT=9000* in the environment, the environment variable wins, and the value *9000* is used.
+The default definition gets the lowest precedence, and environment variables receive the highest. This means that if a default value of *8080* is defined for *nginx_access_port*, as it is in the above 
+example, and *AC_NGINX_ACCESS_PORT=9000* is also defined in the environment, the environment variable wins, and the value *9000* is used.
 
-Since the above file provides a *default* section with port definitions, and the volume definitions are conditional, we can run a standard *build* command with no options and no additional variable
-definitions, and it works:
+Since the above file provides a *default* section with port definitions, and the volume definitions are conditional, the standard *build* command with no options and no additional variable
+definitions works:
 
 ```
 $ ansible-container build
 ```
 
-At runtime we can substitute different values using environment variables or variable file. For demo purposes, there is a *devel.yml* file included in the *ansible* directory providing some possible override 
-values. You can run with those settings using the following command:
+At runtime different values can be substituted using environment variables or a variable file. For demo purposes, there is a *devel.yml* file included in the *ansible* directory providing some possible override 
+values. The application can be started with these settings using the following command:
 
 ```
 $ ansible-container --var-file devel.yml run
 ```
 
-Using Jinja templating in *container.yml* provides some nice flexibility by allowing us to separate the configuration directives from the data, making it possible to substitute different configuration data
-depending on the environment. Incorporating templating also gives us access to control structures like the *{% if %}* and *{% for %}* expressions, as demonstrated above. And, it's even possible
-to share variable definitions with your plabyoook during the *build* process. For example, we could pass the variable file into the playbook run by doing the following:
+Using Jinja templating in *container.yml* provides some nice flexibility by allowing us to separate the configuration directives from the data. This makes it possible to substitute different configuration data
+depending on the environment, and incorporating templating also gives us access to control structures like the *{% if %}* and *{% for %}* expressions, as demonstrated above. And, it's even possible
+to share variable definitions with Ansible Plabyoook during the *build* process. For example, we could pass the variable file into the playbook run by doing the following:
 
 ```
 $ ansible-container --var-file devel.yml build -- -e"@/ansible-container/ansible/devel.yml"  
