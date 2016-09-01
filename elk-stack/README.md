@@ -54,7 +54,7 @@ Variable definitions can be passed to Ansible Container using the following meth
 
 Let's take a look at the *container.yml* starting with the *elk* services. It uses an ELK stack image, *sebp/elk*, pulled from Docker Hub as its base image, and it exposes the standard ELK ports. 
 Notice in each of the defined port mappings the host portion is replaced with a Jinja expression, giving us the following expressions: `{{ kibana_access_port }}`, 
-`{{ beats_access_port }}`, `{{ logstash_access_port }}`, and `{{ forwarder_access_port }}`. These expressions represent variable substitutions in Jinja. For example, if *kibana_access_port*  
+`{{ beats_access_port }}`, `{{ logstash_access_port }}`, and `{{ forwarder_access_port }}`. These expressions represent variable substitutions in Jinja. For example, if *kibana_access_port* 
 is defined as 3000, then 3000 will be substituted for `{{ kibana_access_port }}` during template rendering.
 
 Also, notice the *volumes* directive for the *elk* service. It's wrapped in a Jinja `{% if %} ... {% endif %}` control block. As you might guess just from reading it, if the 
