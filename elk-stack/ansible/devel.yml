@@ -1,0 +1,5 @@
+
+---
+nginx_log_data: ~/data/nginx
+kibana_access_port: 8888
+nginx_access_port: 9000

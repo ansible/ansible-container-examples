@@ -1,0 +1,32 @@
+version: "1"
+defaults:
+  beats_access_port:     9200
+  forwarder_access_port: 5000
+  kibana_access_port:    5601
+  logstash_access_port:  5044
+  nginx_access_port:     8080
+services:
+  elk:
+    image: sebp/elk
+    ports:
+      - "{{ kibana_access_port }}:5601"
+      - "{{ beats_access_port }}:9200"
+      - "{{ logstash_access_port }}:5044"
+      - "{{ forwarder_access_port }}:5000"
+    {% if logstash_data %}
+    volumes:
+      - {{ logstash_data }}:/var/lib/elasticsearch
+    {% endif %}
+  nginx:
+    image: nginx
+    links:
+      - elk:elk
+    ports:
+      - "{{ nginx_access_port }}:8000"
+    command: /usr/local/bin/start.sh
+    user: nginx
+    {% if nginx_log_data %}
+    volumes:
+      - {{ nginx_log_data }}:/var/log/nginx
+    {% endif %}
+registries: {}

@@ -1,0 +1,55 @@
+- hosts: nginx
+  gather_facts: no
+  tasks:
+    - name: Update all packages
+      raw: apt-get update
+
+    - name: Install python and curl 
+      raw: apt-get install -y python curl
+
+    - name: Download filebeat
+      get_url: url=https://download.elastic.co/beats/filebeat/filebeat_1.0.1_amd64.deb dest=/filebeat_1.0.1_amd64.deb mode=0664
+
+    - name: Install filebeat
+      apt: deb=/filebeat_1.0.1_amd64.deb
+
+    - name: Remove package file
+      file: path=/filebeat_1.0.1_amd64.deb state=absent
+
+    - name: Remove nginx access.log
+      file: path=/var/log/nginx/access.log state=absent
+
+    - name: Remove nginx error.log
+      file: path=/var/log/nginx/error.log state=absent
+
+    - name: Add root group and set uid for nginx 
+      user: name=nginx groups=nginx,root uid=1000 
+
+    - name: Set permissions on /var/log/nginx
+      file: path=/var/log/nginx owner=root group=root mode=0775
+
+    - name: Set permissions on /var/cache/nginx
+      file: path=/var/cache/nginx owner=root group=root mode=0775
+
+    - name: Set permission on /run
+      file: path=/run owner=root group=root mode=0775
+
+    - name: Copy default.conf
+      copy: src=../default.conf dest=/etc/nginx/conf.d/default.conf owner=root group=root mode=0664
+
+    - name: Copy filebeat config file
+      copy: src=../filebeat.yml dest=/etc/filebeat/filebeat.yml owner=root group=root mode=0660
+
+    - name: Create certs dir
+      file: path=/etc/pki/tls/certs state=directory recurse=yes owner=root group=root mode=0775
+
+    - name: Copy logstash cert file
+      copy: src=../logstash-beats.crt dest=/etc/pki/tls/certs/logstash-beats.crt owner=root group=root mode=0660
+
+    - name: Copy html dir
+      copy: src=../html dest=/usr/share/nginx/html owner=nginx group=nginx mode=0664
+
+    - name: Copy start.sh script
+      copy: src=../start.sh dest=/usr/local/bin/start.sh owner=root group=root mode=0775
+
+
