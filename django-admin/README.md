@@ -1,13 +1,14 @@
 # django-admin
 
-This is the same example project found in the [ansible-container repo](https://github.com/ansible/ansible-container/tree/master/example) with a slight twist. The images have 
-been modified as needed to make them deployable to OpenShift.  
+This is the same example project found in the [ansible-container repo](https://github.com/ansible/ansible-container/tree/master/example) with a twist. The images have 
+been modified as needed to enable deployment on OpenShift.
 
 ## Why?
 
-The original example project can be deployed to Kubernetes as is. OpenShift is built on Kubernetes, but it has its own Security requiremens. First, container processes cannot
-run as the *root* user. Even the entrypoint script cannot run as a privileged user. Second, the container must be able to run as an arbitrary user. Per the OpenShift 
-[image creation guidelines](https://docs.openshift.org/latest/creating_images/guidelines.html):
+The original project can be deployed to Kubernetes as is. OpenShift is built on Kubernetes, but it has its own security requirements. First, container processes cannot
+run as the *root* user. Even the entrypoint script cannot run as a privileged user. Second, the container must be able to run as an arbitrary user. 
+
+Per the OpenShift [image creation guidelines](https://docs.openshift.org/latest/creating_images/guidelines.html):
 
 > By default, OpenShift Origin runs containers using an arbitrarily assigned user ID. This provides additional security against processes escaping the container due 
 > to a container engine vulnerability and thereby achieves escalated permissions on the host node.
@@ -17,26 +18,23 @@ run as the *root* user. Even the entrypoint script cannot run as a privileged us
 
 ## Changes
 
-So to make the example work within these contstraints the following changes were made:
+To make the example work within these constraints the following changes were made:
 
-- For the postgresql container, switch the base image to [openshift/postgresql-92-centos7](https://hub.docker.com/r/openshift/postgresql-92-centos7/)
-- For the django container, change file permissions on any directories and files the django process will access.   
-- For the static container, also change file permissions on any diretories and files the nginx process will access.
+- For the postgresql service, switch the base image to [openshift/postgresql-92-centos7](https://hub.docker.com/r/openshift/postgresql-92-centos7/)
+- For the django service, change file permissions on any directories and files the django process will access.   
+- For the static service, also change file permissions on any directories and files the nginx process will access.
 
-Setting file permissions entails setting the group to the *root* group and allowing full access to the group. This works becase the arbitrary user OpenShift will use to 
-run the container will be part of the *root* group. For the *django* and *static* containers the file permission changes are applied in the ansible/main.yml playbook. 
-Compare the ansible/main.yml with the origin example/ansible/main.yml playbook, you can see the specific changes.
+Setting file permissions entails changing the group to *root* and granting read, write access to the group. This works because the arbitrary user employed by OpenShift is a member 
+of *root*. The file permission changes are applied in the [ansible/main.yml](https://github.com/ansible/ansible-container-examples/blob/master/django-admin/ansible/main.yml) playbook. 
+If you compare to the original [example/ansible/main.yml](https://github.com/ansible/ansible-container/blob/develop/example/ansible/main.yml) playbook, you'll see the specific changes.
   
 ## Requirements 
 
-There are two ways to use this example. It can be run locally or it can be deployed to a cluster. The catalyst for creating this example was demonstrating a deployment 
-to OpenShift v3, so to that end this document will provide a walk through of running the app locally and deploying it to OpenShift. 
-
-To complete this walk through you will need the following:
+To complete the deployment to OpenShift you will need the following:
 
 - An [OpenShift Online Next Geneneration](https://www.openshift.com/devpreview/) developer preview account.
 - The OpenShift CLI installed. Log into your OpenShift Next Generation account and view [command line tools page](https://console.dev-preview-stg.openshift.com/console/command-line)
-- Ansible Container installed. Follow the [Ansible Container install guide](http://docs.ansible.com/ansible-container/installation.html) to make sure you install any prerequisites, including configuring access to a Docker daemon.
+- Ansible Container installed. See the [Ansible Container install guide](http://docs.ansible.com/ansible-container/installation.html) for assistance.
 - A local copy of the ansible-container-examples repo:
 
     ```
@@ -45,20 +43,26 @@ To complete this walk through you will need the following:
 
 ### Build
 
-Start by building the example. Run the build command from within the *django-admin* directory found in the local copy of the project: 
+Start by building the example. Run the *build* command from within the *django-admin* directory found in your local copy of the project: 
 
 ```
 $ cd ansible-container-examples/django-admin
 $ ansible-container build
 ```
 
-The build command creates the images for the sample application. There are 4 services defined in the [ansible/container.yml](https://github.com/ansible/ansible-container-examples/blob/master/django-admin/ansible/container.yml) 
-file. A container is created for each, along with a build container for running Ansible. The [ansible/main.yml playbook](https://github.com/ansible/ansible-container-examples/blob/master/django-admin/ansible/main.yml) 
-is executed on the build container.  Each of the 4 containers are nodes in the build container's inventory. The playbook is executed against the inventory of 4 
-containers. Once playbook execution completes, the containers are stopped and a snapshot is taken of each container. The snapshot is the image. So once the process 
-completes, we will see 4 new images available in the local image cache.
+The *build* command creates the images for the sample application. There are 4 services defined in [ansible/container.yml](https://github.com/ansible/ansible-container-examples/blob/master/django-admin/ansible/container.yml) 
+To build the images a container is created and started for each service, along with an Ansible Build container for running Ansible. A total of 5 containers will be started.
 
-Running the build command produces the following output:
+The [ansible/main.yml playbook](https://github.com/ansible/ansible-container-examples/blob/master/django-admin/ansible/main.yml) is executed on the Ansible Build container with an inventory
+consisting of the 4 service names defined in *container.yml*. If you examine *main.yml*, you will notice that each play has a *hosts* directive listing one or more of the service names where 
+tasks will be executed. If you're an experienced Ansible user, this should look and feel very familiar. Ansible playbook execution is exactly the same here as it is in any other environment 
+with one exception. Instead of using SSH to communicate to the remote nodes, we're using the Docker connection plugin.
+
+As the build command proceeds, output from the playbook execution will appear, marking the completion of each task and play. Once completed, containers are committed and stopped. A Docker 
+*commit* is essentially a snap-shot of the container at that moment, and it becomes an image. When the build process is fully complete, there will be 4 new images available in the local 
+image cache.
+
+Example output from running the *build* command follows:
 
 ```
 (Re)building the Ansible Container image.
@@ -91,7 +95,7 @@ Cleaning up django build container...
 Cleaning up Ansible Container builder...
 ```
 
-Now checking the local image cache will produce the following: 
+Checking the local image cache shows the new images: 
 
 ```
 $ docker images
@@ -109,8 +113,8 @@ ansible-container-builder         latest              00617d3fed58        20 min
 ## Run
 
 After building the application, run it locally to make sure everything works. The `ansible-container run` command will start each of the containers in 
-an attached state, allowing the stdout of each container to dispaly on your terminal session window. The containers will remain active until the terminal session is
-killed or you send the kill signal by pressing *Ctrl-c* at any point.
+an attached state, streaming stdout of each container terminal window. The containers will remain active until the terminal session is
+killed or the kill signal is sent by pressing *Ctrl-c*.
 
 With the containers running, you should be able to open a browser window and access the application on port 8100 of the Docker daemon host. The root of the application 
 is */admin*. So to get to the application in your browser, you'll enter: `http://<Docker host IP>:8100/admin`
@@ -149,20 +153,21 @@ by '/' and the name of the project:
 $ ansible-container push --push-to https://registry.dev-preview-stg.openshift.com/django-admin --username <username> --password <access token>
 ```
 
-After successfully pushing the images, take a look at the images on OpenShift. Images on Openshift are ferred to as *image streams*. Within your OpenShift web console
-go to  [image streams](https://console.dev-preview-stg.openshift.com/console/project/django-admin/browse/images?main-tab=openshiftConsole%2Fbrowse&sub-tab=openshiftConsole%2Fbrowse-images). You should see a similar list of image streams:
+After successfully pushing the images, take a look at the images on OpenShift. Images on Openshift are referred to as *image streams*. Within your OpenShift web console
+go to  [image streams](https://console.dev-preview-stg.openshift.com/console/project/django-admin/browse/images?main-tab=openshiftConsole%2Fbrowse&sub-tab=openshiftConsole%2Fbrowse-images). 
+You should see a similar list of image streams:
 
 ![image streams](https://github.com/ansible/ansible-container-examples/blob/master/images/image_streams.png) 
 
 ## ShipIt
 
-Next, run *shipit* to generate a deployment playbook and role. Specifiy the *openshift* engine, and use the --push-to option to specify the URL the cluster will use to locate 
-and pull the images.
+Next, run *shipit* to generate a deployment playbook and role. Specify the *openshift* engine, and use the --pull-from option to specify the URL the cluster will use to pull 
+the images.
 
-**NOTE** the URL for the *--pull-to* option is not the same URL used to push the images. The --pull-to URL will point to the internal registry using an IP address. 
+**NOTE** the URL for the *--pull-from* option is not the same URL used to push the images. The --pull-from URL will point to the internal registry using an IP address. 
 View the [image streams page](https://console.dev-preview-stg.openshift.com/console/project/django-admin/browse/images?main-tab=openshiftConsole%2Fbrowse&sub-tab=openshiftConsole%2Fbrowse-images) in your OpenShift web console to get the correct IP address.
 
-Follow the IP address with '/' + the name of the project. Your *shipit* command will look similar to the following:
+Follow the IP address with '/' + the name of the project. Your *shipit* command will be similar to the following:
 
 ```
 $ ansible-container shipit openshift --pull-from 172.30.46.234:5000/django-admin
@@ -236,14 +241,21 @@ static       1          1          config
 
 ```
 
-The route contains the URL for accessing the application via web browser. It's the full *openshfitapps.com* domain listed under *HOST/PORT*. Add '/admin' to view the 
-same log-in page viewed while the app ran locally.
+The route contains the URL for accessing the application via web browser. It's the full *openshfitapps.com* domain listed under *HOST/PORT* in the output from `oc get route`. 
+Add '/admin' to view the same log-in page viewed when the app ran locally.
 
 **NOTE** The domain name is randomly generated by OpenShift. Use the domain generated by OpenShift in your environment, not the one listed in the above `oc get route`
 output example.
 
-Using the above output from the `oc get route` command as an example, the app can be accessed with the following: 
+Using the above output from `oc get route`, the log-in page to our app is accessed with the following: 
 
 ```
 http://static-80-django-admin.b795.dev-preview-stg.openshiftapps.com/admin
 ```
+
+With not too much effort we were able to launch the app on OpenShift and demonstrate how Ansible Container manages the container lifecycle. If you're interested in 
+learning more, or have questions, please let us know how we can help. The best ways to reach us are:
+
+* [Join the  mailing list](https://groups.google.com/forum/#!forum/ansible-container)
+* [Open an issue](https://github.com/ansible/ansible-container/issues)
+* Join the #ansible-container channel on irc.freenode.net.
