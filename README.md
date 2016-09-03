@@ -5,6 +5,7 @@ A few starter applications to demonstrate [Ansible Container](https://github.com
 - [django-admin](https://github.com/ansible/ansible-container-examples/tree/master/django-admin)
 - [sshd](https://github.com/ansible/ansible-container-examples/tree/master/sshd)
 - [elk-stack](https://github.com/ansible/ansible-container-examples/tree/master/elk-stack)
+- [helloworld-nginx](https://github.com/ansible/ansible-container-examples/tree/master/helloworld-nginx)
 
 Visit each example to view the README containing detailed instructions and a walk-through. If it's not listed here, it's still under development, in which case expect 
 breakage, frequent updates, etc.
