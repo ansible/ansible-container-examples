@@ -14,6 +14,6 @@ This GIST assumes you have read the [Ansible Container docs](https://docs.ansibl
 5. Run `ansible-container build`
 6. Run `ansible-container run`
 
-Open `http://localhost:8000` in your browser, and see the content of `files/index.html`. 
+Open `http://localhost:8080` in your browser, and see the content of `files/index.html`. 
 
 If you're running Docker Machine, in your terminal session run `open http://$(docker-machine ip default):8080`, replacing `default` with your machine name.
