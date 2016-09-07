@@ -20,4 +20,4 @@ breakage, frequent updates, etc.
 ## Upcoming events
 
 - [AnsibleFest Brooklyn October, 2016](https://www.ansible.com/ansiblefest)
-- [NYC Ansible Meetup 9/14/2016](http://www.meetup.com/Ansible-NYC) 
+- [Docker NYC Meetup 9/14/2016](http://www.meetup.com/Docker-NewYorkCity/) 
