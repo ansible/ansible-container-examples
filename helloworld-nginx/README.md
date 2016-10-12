@@ -1,6 +1,6 @@
 # Ansible-continer HelloWorld
 
-Here is a quick [Ansible Container](https://github.com/ansible/ansible-container) HelloWorsld deployment running Nginx. 
+Here is a quick [Ansible Container](https://github.com/ansible/ansible-container) HelloWorld deployment running Nginx. 
 
 The config creates a single Centos 7 container running nginx exposed on port 8080. 
 
