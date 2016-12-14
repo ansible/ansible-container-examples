@@ -1,4 +1,4 @@
-# Ansible-continer HelloWorld
+# Ansible-container HelloWorld
 
 Here is a quick [Ansible Container](https://github.com/ansible/ansible-container) HelloWorsld deployment running Nginx. 
 
