@@ -1,0 +1,17 @@
+body {
+  background: #F8A434;
+  font-family: 'Lato', sans-serif;
+  color: #FDFCFB;
+  text-align: center;
+  position: relative;
+  bottom: 35px;
+  top: 65px;
+}
+.description {
+  position: relative;
+  top: 55px;
+  font-size: 50px;
+  letter-spacing: 1.5px;
+  line-height: 1.3em;
+  margin: -2px 0 45px;
+}
