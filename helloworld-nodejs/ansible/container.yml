@@ -1,0 +1,11 @@
+version: "1"
+services:
+  web:
+    image: node:latest
+    ports:
+      - "8080:8080"
+
+    command: ['node', '/usr/src/app/server.js']
+
+
+registries: {}
