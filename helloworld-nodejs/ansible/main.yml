@@ -1,0 +1,14 @@
+- hosts: web
+  tasks:
+    - name: create app directory
+      file:
+        path: /usr/src/app
+        state: directory
+        owner: node
+        group: node
+
+    - name: Copy server.js
+      copy:
+        src: files/server.js
+        dest: /usr/src/app/server.js
+        mode: 0777
