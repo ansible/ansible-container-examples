@@ -1,9 +1,36 @@
-version: "1"
-services:
-  web:
-    image: centos:7
-    ports:
-      - "5000:5000"
+version: "2"
+settings:
 
-    command: ['/usr/bin/dumb-init', 'python', '/flaskapp/hello_world.py']
-registries: {}
+  conductor:
+    # The Conductor container does the heavy lifting, and provides a portable
+    # Python runtime for building your target containers. It should be derived
+    # from the same distribution as you're building your target containers with.
+    base: fedora:26
+    # roles_path:   # Specify a local path containing Ansible roles
+    # volumes:      # Provide a list of volumes to mount
+    # environment:  # List or mapping of environment variables
+
+  # Set the name of the project. Defaults to basename of the project directory.
+  # For built services, concatenated with service name to form the built image name.
+  project_name: test
+
+  # The deployment_output_path is mounted to the Conductor container, and the 
+  # `run` and `deployment` commands then write generated Ansible playbooks to it.
+  # deployment_output_path: ./ansible-deployment
+
+services: 
+  # Add your containers here, specifying the base image you want to build from.
+  # To use this example, uncomment it and delete the curly braces after services key.
+  # You may need to run `docker pull ubuntu:trusty` for this to work.
+  web:
+    from: "fedora:26"
+    roles: 
+      - base
+    ports:
+      - "5000:80"
+    command: ["/usr/bin/dumb-init", "httpd", "-DFOREGROUND"]
+    volumes:
+      - $PWD/flask-helloworld:/flaskapp:Z
+    dev_overrides:
+      environment:
+        - "DEBUG=1"
