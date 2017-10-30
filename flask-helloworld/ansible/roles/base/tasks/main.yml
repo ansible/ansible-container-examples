@@ -1,0 +1,16 @@
+---
+- name: Install dependencies 
+  dnf: pkg={{item}} state=present
+  with_items:
+    - python3-flask
+    - dumb-init
+    - httpd
+    - python3-mod_wsgi
+
+- name: copy the apache configuration
+  copy:
+    src: flask-helloworld.conf
+    dest: /etc/httpd/conf.d/flask-helloworld.conf
+    owner: apache
+    group: root
+    mode: 655
